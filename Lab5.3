@@ -1,0 +1,31 @@
+DECLARE
+    v_maxID NUMBER;
+    v_count NUMBER := 0;
+
+    PROCEDURE add_new_employee(p_newID IN NUMBER) IS
+    BEGIN
+        INSERT INTO EMPLOYEES
+        SELECT p_newID, FIRST_NAME, LAST_NAME,
+               SUBSTR(FIRST_NAME, 1, 1) || SUBSTR(LAST_NAME, 1, 7) || '@example.com',
+               PHONE_NUMBER, SYSDATE, JOB_ID, SALARY, COMMISSION_PCT, MANAGER_ID, DEPARTMENT_ID
+        FROM EMPLOYEES
+        WHERE EMPLOYEE_ID = p_newID - 100;
+        
+        v_count := v_count + 1;
+    EXCEPTION
+        WHEN DUP_VAL_ON_INDEX THEN
+            add_new_employee(p_newID + 1);
+    END;
+
+BEGIN
+    SELECT MAX(EMPLOYEE_ID) INTO v_maxID FROM EMPLOYEES;
+    
+    add_new_employee(v_maxID + 1);
+    add_new_employee(v_maxID + 2);
+    
+    DBMS_OUTPUT.PUT_LINE('จำนวนพนักงานที่เพิ่มสำเร็จ: ' || v_count);
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('เกิดข้อผิดพลาด: ' || SQLERRM);
+        ROLLBACK;
+END;
