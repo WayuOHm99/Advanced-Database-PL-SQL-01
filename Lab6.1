@@ -1,0 +1,39 @@
+CREATE TABLE SA_EMP AS
+SELECT EMPLOYEE_ID, FIRST_NAME, LAST_NAME, JOB_ID, SALARY, COMMISSION_PCT, DEPARTMENT_ID
+FROM employees
+WHERE JOB_ID IN ('SA_MAN', 'SA_REP')
+AND DEPARTMENT_ID = (SELECT DEPARTMENT_ID FROM departments WHERE department_name = 'Sales');
+
+Run and create worksheet
+
+DECLARE
+    v_count_manager NUMBER := 0;  -- ตัวแปรสำหรับนับจำนวนผู้จัดการ
+    v_count_rep NUMBER := 0;      -- ตัวแปรสำหรับนับจำนวนพนักงานขาย
+BEGIN
+    -- ปรับปรุงค่าคอมมิชันให้ผู้จัดการ (เพิ่ม 10%)
+    UPDATE SA_EMP
+    SET COMMISSION_PCT = COMMISSION_PCT * 1.10
+    WHERE JOB_ID = 'SA_MAN';
+    
+    -- นับจำนวนผู้จัดการที่ได้รับการปรับปรุงข้อมูล
+    v_count_manager := SQL%ROWCOUNT;
+
+    -- ปรับปรุงค่าคอมมิชันให้พนักงานขาย (เพิ่ม 20%)
+    UPDATE SA_EMP
+    SET COMMISSION_PCT = COMMISSION_PCT * 1.20
+    WHERE JOB_ID = 'SA_REP';
+    
+    -- นับจำนวนพนักงานขายที่ได้รับการปรับปรุงข้อมูล
+    v_count_rep := SQL%ROWCOUNT;
+
+    -- แสดงจำนวนพนักงานที่ได้รับการปรับปรุงข้อมูล
+    DBMS_OUTPUT.PUT_LINE('จำนวนผู้จัดการที่ได้รับการปรับปรุง: ' || v_count_manager);
+    DBMS_OUTPUT.PUT_LINE('จำนวนพนักงานขายที่ได้รับการปรับปรุง: ' || v_count_rep);
+    
+    -- บันทึกข้อมูลลงฐานข้อมูลอย่างถาวร
+    COMMIT;
+END;
+
+Run and create worksheet
+
+SELECT * FROM SA_EMP;
