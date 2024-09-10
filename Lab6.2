@@ -1,0 +1,26 @@
+DECLARE
+    v_manager_salary NUMBER;
+    v_max_emp_salary NUMBER;
+BEGIN
+    FOR manager_rec IN (SELECT employee_id, first_name, salary
+                        FROM employees
+                        WHERE employee_id BETWEEN 145 AND 147) LOOP
+        -- ดึงเงินเดือนของผู้จัดการแต่ละคน
+        v_manager_salary := manager_rec.salary;
+
+        -- ดึงเงินเดือนของพนักงานขายที่มีเงินเดือนสูงที่สุดใต้บังคับบัญชาของผู้จัดการคนนั้น
+        SELECT MAX(salary)
+        INTO v_max_emp_salary
+        FROM employees
+        WHERE manager_id = manager_rec.employee_id;
+
+        -- ตรวจสอบว่าพนักงานมีเงินเดือนสูงกว่าผู้จัดการหรือไม่
+        IF v_max_emp_salary > v_manager_salary THEN
+            DBMS_OUTPUT.PUT_LINE('ID:' || manager_rec.employee_id || ' ' || manager_rec.first_name || 
+                                 ' earns ' || v_manager_salary || ', MORE THAN ' || v_max_emp_salary || '.');
+        ELSE
+            DBMS_OUTPUT.PUT_LINE('ID:' || manager_rec.employee_id || ' ' || manager_rec.first_name || 
+                                 ' earns ' || v_manager_salary || ', NO EMPLOYEE EARNS MORE.');
+        END IF;
+    END LOOP;
+END;
