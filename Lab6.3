@@ -1,0 +1,43 @@
+DECLARE
+    -- สร้าง RECORD type สำหรับเก็บข้อมูลพนักงาน
+    TYPE emp_record_type IS RECORD (
+        emp_id NUMBER,
+        emp_name VARCHAR2(100),
+        hire_date DATE,
+        years_worked NUMBER,
+        months_worked NUMBER
+    );
+    
+    -- ตัวแปรสำหรับเก็บข้อมูลพนักงาน
+    emp_info emp_record_type;
+    
+    -- ตัวแปรสำหรับคำนวณระยะเวลาทำงาน
+    v_months_between NUMBER;
+
+BEGIN
+    -- ดึงข้อมูลพนักงานจากตาราง employees
+    SELECT employee_id, first_name || ' ' || last_name, hire_date
+    INTO emp_info.emp_id, emp_info.emp_name, emp_info.hire_date
+    FROM employees
+    WHERE employee_id = 200;
+    
+    -- คำนวณระยะเวลาทำงานเป็นเดือน
+    v_months_between := MONTHS_BETWEEN(SYSDATE, emp_info.hire_date);
+    
+    -- คำนวณจำนวนปีและเดือนที่ทำงาน
+    emp_info.years_worked := FLOOR(v_months_between / 12);
+    emp_info.months_worked := FLOOR(MOD(v_months_between, 12));
+    
+    -- แสดงผลลัพธ์
+    DBMS_OUTPUT.PUT_LINE('Printed on ' || TO_CHAR(SYSDATE, 'DD/MM/YYYY'));
+    DBMS_OUTPUT.PUT_LINE('ID:' || emp_info.emp_id || ' ' || emp_info.emp_name || 
+                         ', since ' || TO_CHAR(emp_info.hire_date, 'DD/MM/YYYY') || 
+                         ', ' || emp_info.years_worked || ' years ' || 
+                         emp_info.months_worked || ' months.');
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('ไม่พบข้อมูลพนักงานรหัส 200');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('เกิดข้อผิดพลาด: ' || SQLERRM);
+END;
