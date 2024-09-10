@@ -1,26 +1,50 @@
 DECLARE
-    v_manager_salary NUMBER;
-    v_max_emp_salary NUMBER;
+-- Variables to hold manager and employee details
+v_mgr_id employees.employee_id%TYPE;
+v_mgr_name employees.first_name%TYPE;
+v_mgr_salary employees.salary%TYPE;
+v_emp_salary employees.salary%TYPE;
+v_highest_salary employees.salary%TYPE;
+v_emp_name employees.first_name%TYPE;
+
+CURSOR mgr_cursor IS
+-- Cursor to select all managers with ID 145 to 147
+SELECT employee_id, first_name, salary
+FROM employees
+WHERE employee_id BETWEEN 145 AND 147;
+
+CURSOR emp_cursor (p_mgr_id employees.employee_id%TYPE) IS
+-- Cursor to select all sales employees under the given manager
+SELECT first_name, salary
+FROM employees
+WHERE manager_id = p_mgr_id;
+
 BEGIN
-    FOR manager_rec IN (SELECT employee_id, first_name, salary
-                        FROM employees
-                        WHERE employee_id BETWEEN 145 AND 147) LOOP
-        -- ดึงเงินเดือนของผู้จัดการแต่ละคน
-        v_manager_salary := manager_rec.salary;
+-- Loop through each manager
+FOR mgr_rec IN mgr_cursor LOOP
+v_highest_salary := 0; -- Initialize highest salary
 
-        -- ดึงเงินเดือนของพนักงานขายที่มีเงินเดือนสูงที่สุดใต้บังคับบัญชาของผู้จัดการคนนั้น
-        SELECT MAX(salary)
-        INTO v_max_emp_salary
-        FROM employees
-        WHERE manager_id = manager_rec.employee_id;
+-- Assign manager details
+v_mgr_id := mgr_rec.employee_id;
+v_mgr_name := mgr_rec.first_name;
+v_mgr_salary := mgr_rec.salary;
 
-        -- ตรวจสอบว่าพนักงานมีเงินเดือนสูงกว่าผู้จัดการหรือไม่
-        IF v_max_emp_salary > v_manager_salary THEN
-            DBMS_OUTPUT.PUT_LINE('ID:' || manager_rec.employee_id || ' ' || manager_rec.first_name || 
-                                 ' earns ' || v_manager_salary || ', MORE THAN ' || v_max_emp_salary || '.');
-        ELSE
-            DBMS_OUTPUT.PUT_LINE('ID:' || manager_rec.employee_id || ' ' || manager_rec.first_name || 
-                                 ' earns ' || v_manager_salary || ', NO EMPLOYEE EARNS MORE.');
-        END IF;
-    END LOOP;
+-- Loop through each employee under the manager
+FOR emp_rec IN emp_cursor(v_mgr_id) LOOP
+v_emp_salary := emp_rec.salary;
+
+-- Find the highest salary under the manager
+IF v_emp_salary > v_highest_salary THEN
+v_highest_salary := v_emp_salary;
+v_emp_name := emp_rec.first_name;
+END IF;
+END LOOP;
+
+-- Display the highest paid employee under the manager
+IF v_highest_salary > 0 THEN
+DBMS_OUTPUT.PUT_LINE('ID:' || v_mgr_id || ' ' || v_mgr_name || ' earns ' || v_mgr_salary || ', more than ' || v_highest_salary);
+END IF;
+
+END LOOP;
+
 END;
