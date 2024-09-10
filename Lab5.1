@@ -1,0 +1,11 @@
+DECLARE
+    v_StdID VARCHAR2(8) := 'B66*****';  -- พิมพ์รหัสนักศึกษา
+    v_StdName VARCHAR2(100) := '**** *****';  -- พิมพ์ชื่อ-สกุล
+    v_Today DATE := SYSDATE;
+    v_Tomorrow v_Today%TYPE := v_Today + 1;
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('ID : ' || v_StdID);
+    DBMS_OUTPUT.PUT_LINE('Name : ' || v_StdName);
+    DBMS_OUTPUT.PUT_LINE('Today : ' || TO_CHAR(v_Today, 'DD-MON-YYYY'));
+    DBMS_OUTPUT.PUT_LINE('Tomorrow : ' || TO_CHAR(v_Tomorrow, 'DD-MON-YYYY'));
+END;
